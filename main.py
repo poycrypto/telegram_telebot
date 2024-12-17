@@ -22,8 +22,8 @@ saved_lfg_files = []
 saved_pump_files = []
 
 
-# Function to handle replies with the "/save" command
-@bot.message_handler(func=lambda message: message.reply_to_message and message.text.lower().startswith('/save'))
+# Function to handle replies with the "/add" command
+@bot.message_handler(func=lambda message: message.reply_to_message and message.text.lower().startswith('/add'))
 def save_file(message):
     global saved_lfg_files, saved_pump_files
 
