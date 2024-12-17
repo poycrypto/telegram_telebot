@@ -7,7 +7,7 @@ import random
 API_TOKEN = '7813890682:AAFfxPjkS8gaW_QO-l_gTceQwErmj2ONMvs'
 
 # Replace with your group chat ID
-GROUP_CHAT_ID = -1002383486624 # Example: replace with your actual group chat ID
+GROUP_CHAT_ID = -1002376294175 # Example: replace with your actual group chat ID
 
 bot = telebot.TeleBot(API_TOKEN)
 
