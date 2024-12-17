@@ -22,6 +22,14 @@ saved_lfg_files = []
 saved_pump_files = []
 
 
+# Function to check if the file should already exist
+def file_already_saved(file_path, saved_list):
+    """
+    Check if the file is already saved in the list.
+    """
+    return file_path in saved_list
+
+
 # Function to handle replies with the "/add" command
 @bot.message_handler(func=lambda message: message.reply_to_message and message.text.lower().startswith('/add'))
 def save_file(message):
@@ -33,18 +41,30 @@ def save_file(message):
         if message.reply_to_message.animation:
             print("Found GIF in reply.")
             file_id = message.reply_to_message.animation.file_id
-            # Save with ".gif" extension
             save_path = os.path.join(GIF_DIRECTORY, f"{file_id}.gif")
         elif message.reply_to_message.sticker:
             print("Found sticker in reply.")
             file_id = message.reply_to_message.sticker.file_id
-            # Save with ".webp" extension
             save_path = os.path.join(GIF_DIRECTORY, f"{file_id}.webp")
         else:
             bot.reply_to(message, "No animation or sticker found in the reply.")
             return
 
-        # Download and save
+        # Determine if user wants to save to LFG or Pump and only check that specific list
+        if 'pump' in message.text.lower():
+            # Only check the Pump collection
+            if save_path in saved_pump_files:
+                bot.reply_to(message, "This file is already saved to the Pump collection.")
+                print("Skipping save for Pump files.")
+                return
+        elif 'lfg' in message.text.lower():
+            # Only check the LFG collection
+            if save_path in saved_lfg_files:
+                bot.reply_to(message, "This file is already saved to the LFG collection.")
+                print("Skipping save for LFG files.")
+                return
+
+        # Proceed to download and save only if checks pass
         try:
             file_info = bot.get_file(file_id)
             downloaded_file = bot.download_file(file_info.file_path)
@@ -67,8 +87,7 @@ def save_file(message):
 
         except Exception as e:
             bot.reply_to(message, f"Failed to save file: {str(e)}")
-            print("Error:", e)
-
+            print("Error during download/save:", e)
 
 # Handle sending random saved LFG GIFs or stickers when "/lfg" is typed
 @bot.message_handler(func=lambda message: message.text.lower() == '/lfg')
@@ -131,28 +150,29 @@ def delete_file(message):
         # Attempt to delete the file
         if os.path.exists(file_path):
             try:
-                os.remove(file_path)
-                # Remove from the list
+                os.remove(file_path)  # Remove the actual file from the system
+                # Remove from saved lists
                 if file_path in saved_lfg_files:
                     saved_lfg_files.remove(file_path)
                     bot.reply_to(message, "LFG file deleted successfully.")
                     print("Deleted from LFG files:", saved_lfg_files)
-                elif file_path in saved_pump_files:
+                if file_path in saved_pump_files:
                     saved_pump_files.remove(file_path)
                     bot.reply_to(message, "Pump file deleted successfully.")
                     print("Deleted from Pump files:", saved_pump_files)
             except Exception as e:
                 bot.reply_to(message, f"Failed to delete file: {str(e)}")
-                print("Error:", e)
+                print("Error during delete:", e)
         else:
-            bot.reply_to(message, f"File does not exist: {file_path}")
-            print("File does not exist:", file_path)
-
-
-# General command handler debug (optional)
-@bot.message_handler(func=lambda message: message.chat.id == GROUP_CHAT_ID)
-def handle_commands(message):
-    print("Received message:", message.text)  # Log all received messages
+            # Handle cases where the file doesn't exist but is still in the list
+            if file_path in saved_lfg_files:
+                saved_lfg_files.remove(file_path)
+                bot.reply_to(message, "LFG file reference removed.")
+                print("Removed reference from LFG files.")
+            if file_path in saved_pump_files:
+                saved_pump_files.remove(file_path)
+                bot.reply_to(message, "Pump file reference removed.")
+                print("Removed reference from Pump files.")
 
 
 # Start polling
