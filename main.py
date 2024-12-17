@@ -1,8 +1,6 @@
 import telebot
 import os
-from datetime import datetime
 import random
-import re
 
 # Replace with your actual Bot Token
 API_TOKEN = '7813890682:AAFfxPjkS8gaW_QO-l_gTceQwErmj2ONMvs'
@@ -12,91 +10,150 @@ GROUP_CHAT_ID = -1002376294175  # Example: replace with your actual group chat I
 
 bot = telebot.TeleBot(API_TOKEN)
 
-# Directories to save GIFs and Stickers
-SAVE_DIRECTORY = "saved_files"
+# Directory to save the GIFs and stickers
+GIF_DIRECTORY = "saved_gifs"
 
-# Ensure directory exists
-if not os.path.exists(SAVE_DIRECTORY):
-    os.makedirs(SAVE_DIRECTORY)
+# Ensure save directory exists
+if not os.path.exists(GIF_DIRECTORY):
+    os.makedirs(GIF_DIRECTORY)
 
-# Separate lists for saved GIFs and stickers by their type
-saved_lfg_files = []  # Files saved with `/save.lfg`
-saved_pump_files = []  # Files saved with `/save.pump`
+# Lists to store saved file paths
+saved_lfg_files = []
+saved_pump_files = []
 
-# Function to handle replies with the "/save.lfg" command
+
+# Function to handle replies with the "/save" command
 @bot.message_handler(func=lambda message: message.reply_to_message and message.text.lower().startswith('/save'))
 def save_file(message):
     global saved_lfg_files, saved_pump_files
 
-    if message.reply_to_message and (message.reply_to_message.animation or message.reply_to_message.sticker):
-        # Determine the type of save based on the command
-        if 'pump' in message.text.lower():
-            save_type = 'pump'
-        elif 'lfg' in message.text.lower():
-            save_type = 'lfg'
+    print("Received command:", message.text)  # Log the full command
+    if message.reply_to_message:
+        # Detect if it’s an animation or sticker
+        if message.reply_to_message.animation:
+            print("Found GIF in reply.")
+            file_id = message.reply_to_message.animation.file_id
+            # Save with ".gif" extension
+            save_path = os.path.join(GIF_DIRECTORY, f"{file_id}.gif")
+        elif message.reply_to_message.sticker:
+            print("Found sticker in reply.")
+            file_id = message.reply_to_message.sticker.file_id
+            # Save with ".webp" extension
+            save_path = os.path.join(GIF_DIRECTORY, f"{file_id}.webp")
         else:
-            bot.reply_to(message, "Please specify '/save lfg' or '/save pump'.")
+            bot.reply_to(message, "No animation or sticker found in the reply.")
             return
 
-        file_id = None
-        file_path = None
-
-        if message.reply_to_message.animation:
-            # Handle GIFs
-            file_id = message.reply_to_message.animation.file_id
+        # Download and save
+        try:
             file_info = bot.get_file(file_id)
-            file_path = os.path.join(SAVE_DIRECTORY, f"{file_id}.gif")
-        elif message.reply_to_message.sticker:
-            # Handle Stickers
-            file_id = message.reply_to_message.sticker.file_id
-            file_info = bot.get_file(file_id)
-            file_path = os.path.join(SAVE_DIRECTORY, f"{file_id}.webp")
-
-        if file_info:
             downloaded_file = bot.download_file(file_info.file_path)
-            with open(file_path, 'wb') as new_file:
-                new_file.write(downloaded_file)
 
-            if save_type == 'pump':
-                saved_pump_files.append(file_id)
-                bot.reply_to(message, "File saved for Pump commands.")
-            elif save_type == 'lfg':
-                saved_lfg_files.append(file_id)
-                bot.reply_to(message, "File saved for LFG commands.")
-        else:
-            bot.reply_to(message, "Could not download the file.")
+            with open(save_path, 'wb') as f:
+                f.write(downloaded_file)
+
+            # Log the saved path for debugging
+            print("Saved file at:", save_path)
+
+            # Determine save type
+            if 'pump' in message.text.lower():
+                saved_pump_files.append(save_path)
+                bot.reply_to(message, "Saved to Pump collection.")
+                print("Pump files saved:", saved_pump_files)
+            elif 'lfg' in message.text.lower():
+                saved_lfg_files.append(save_path)
+                bot.reply_to(message, "Saved to LFG collection.")
+                print("LFG files saved:", saved_lfg_files)
+
+        except Exception as e:
+            bot.reply_to(message, f"Failed to save file: {str(e)}")
+            print("Error:", e)
+
 
 # Handle sending random saved LFG GIFs or stickers when "/lfg" is typed
-@bot.message_handler(func=lambda message: message.chat.id == GROUP_CHAT_ID and message.text.lower() == '/lfg')
+@bot.message_handler(func=lambda message: message.text.lower() == '/lfg')
 def send_random_lfg_file(message):
-    if saved_lfg_files:
-        file_id = random.choice(saved_lfg_files)
-        file_path = os.path.join(SAVE_DIRECTORY, f"{file_id}.gif") if file_id.endswith('.gif') else os.path.join(SAVE_DIRECTORY, f"{file_id}.webp")
-        
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as file:
-                if file_path.endswith(".gif"):
-                    bot.send_animation(message.chat.id, file)
-                else:
-                    bot.send_sticker(message.chat.id, file)
-        else:
-            bot.reply_to(message, "Saved LFG file could not be found.")
+    print("Triggered /lfg command.")
 
-# Handle sending random saved pump GIFs or stickers when "/pump" is typed
-@bot.message_handler(func=lambda message: message.chat.id == GROUP_CHAT_ID and message.text.lower() == '/pump')
-def send_random_pump_file(message):
-    if saved_pump_files:
-        file_id = random.choice(saved_pump_files)
-        file_path = os.path.join(SAVE_DIRECTORY, f"{file_id}.gif") if file_id.endswith('.gif') else os.path.join(SAVE_DIRECTORY, f"{file_id}.webp")
-        
-        if os.path.exists(file_path):
+    if saved_lfg_files:
+        file_path = random.choice(saved_lfg_files)
+        try:
+            print("Sending LFG file:", file_path)
             with open(file_path, 'rb') as file:
-                if file_path.endswith(".gif"):
-                    bot.send_animation(message.chat.id, file)
-                else:
-                    bot.send_sticker(message.chat.id, file)
+                bot.send_animation(message.chat.id, file)
+            print("LFG file sent successfully.")
+        except Exception as e:
+            bot.reply_to(message, f"Failed to send LFG file: {str(e)}")
+            print("Error:", e)
+    else:
+        bot.reply_to(message, "No LFG files are saved.")
+
+
+# Handle sending random saved Pump GIFs or stickers when "/pump" is typed
+@bot.message_handler(func=lambda message: message.text.lower() == '/pump')
+def send_random_pump_file(message):
+    print("Triggered /pump command.")
+
+    if saved_pump_files:
+        file_path = random.choice(saved_pump_files)
+        try:
+            print("Sending Pump file:", file_path)
+            with open(file_path, 'rb') as file:
+                bot.send_animation(message.chat.id, file)
+            print("Pump file sent successfully.")
+        except Exception as e:
+            bot.reply_to(message, f"Failed to send Pump file: {str(e)}")
+            print("Error:", e)
+    else:
+        bot.reply_to(message, "No Pump files are saved.")
+
+# Function to handle replies with the "/delete" command
+@bot.message_handler(func=lambda message: message.reply_to_message and message.text.lower() == '/delete')
+def delete_file(message):
+    global saved_lfg_files, saved_pump_files
+
+    print("Triggered /delete command.")
+    if message.reply_to_message:
+        # Check if it's an animation or sticker
+        if message.reply_to_message.animation:
+            file_id = message.reply_to_message.animation.file_id
+            file_path = os.path.join(GIF_DIRECTORY, f"{file_id}.gif")
+        elif message.reply_to_message.sticker:
+            file_id = message.reply_to_message.sticker.file_id
+            file_path = os.path.join(GIF_DIRECTORY, f"{file_id}.webp")
         else:
-            bot.reply_to(message, "Saved Pump file could not be found.")
+            bot.reply_to(message, "No animation or sticker found in the reply.")
+            return
+
+        # Log the computed path for debugging
+        print("Attempting to delete file:", file_path)
+
+        # Attempt to delete the file
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+                # Remove from the list
+                if file_path in saved_lfg_files:
+                    saved_lfg_files.remove(file_path)
+                    bot.reply_to(message, "LFG file deleted successfully.")
+                    print("Deleted from LFG files:", saved_lfg_files)
+                elif file_path in saved_pump_files:
+                    saved_pump_files.remove(file_path)
+                    bot.reply_to(message, "Pump file deleted successfully.")
+                    print("Deleted from Pump files:", saved_pump_files)
+            except Exception as e:
+                bot.reply_to(message, f"Failed to delete file: {str(e)}")
+                print("Error:", e)
+        else:
+            bot.reply_to(message, f"File does not exist: {file_path}")
+            print("File does not exist:", file_path)
+
+
+# General command handler debug (optional)
+@bot.message_handler(func=lambda message: message.chat.id == GROUP_CHAT_ID)
+def handle_commands(message):
+    print("Received message:", message.text)  # Log all received messages
+
 
 # Start polling
 bot.polling(none_stop=True)
