@@ -176,4 +176,4 @@ def delete_file(message):
 
 
 # Start polling
-bot.polling(none_stop=True)
+bot.infinity_polling()
