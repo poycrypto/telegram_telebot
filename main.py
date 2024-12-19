@@ -1,15 +1,23 @@
 import telebot
 import os
 import random
+import re
+import threading
+import time
 
 # Replace with your actual Bot Token
 API_TOKEN = '7813890682:AAFfxPjkS8gaW_QO-l_gTceQwErmj2ONMvs'
+API_TOKEN2 = '7901553472:AAHx6I8DofBE-_BRhLl03Dr8h4JhffshMWw'
 
 # Replace with your group chat ID
 GROUP_CHAT_ID = -1002376294175  # Example: replace with your actual group chat ID
 
 bot = telebot.TeleBot(API_TOKEN)
+bot2 = telebot.TeleBot(API_TOKEN2)
 
+answers = ["That's smart money", "Corporate buying the dip", "Hell of an entry!", "I hope you're ready for the yacht"]
+answers2 = ["That’s not a buy, that’s a low-key flex", "Did Goldman Sachs give you a tip bro?", "Straight from the big bank playbook", "Institution."]
+answers3 = ["That’s the kind of buy you make in a limo lol"]
 # Directory to save the GIFs and stickers
 GIF_DIRECTORY = "saved_gifs"
 
@@ -175,5 +183,69 @@ def delete_file(message):
                 print("Removed reference from Pump files.")
 
 
-# Start polling
-bot.infinity_polling()
+################################################################################################
+
+@bot2.message_handler(content_types=['text', 'sticker', 'animation'])
+# Initialize an empty DataFrame to store message data
+def message_handler(message):
+    # Check if the message contains the 💵 symbol
+    if message.content_type == "animation":
+        if '💵' in message.caption:
+            # Use regular expression to get the part after "💵"
+            match = re.search(r'💵\s*\$([\d.,]+)', message.caption)
+            if match:
+                part_after_sign = match.group(1).strip()  # Extract the part after "💵"
+                # Get the timestamp of the message
+                
+                if (float(part_after_sign) >= 500.0):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers3))
+                if (float(part_after_sign) >= 400.0):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers2))
+                elif (float(part_after_sign) >= 200.0) and (random.random() < 0.4):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
+                elif (float(part_after_sign) >= 150.0) and (random.random() < 0.3):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
+                elif (float(part_after_sign) >= 100.0) and (random.random() < 0.2):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
+                elif (float(part_after_sign) >= 50.0) and (random.random() < 0.20):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
+                elif (float(part_after_sign) <= 50.0) and (random.random() < 0.15):
+                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))      
+            else:
+                print("No content found after 💵.")
+        else:
+            print("The message doesn't contain 💵.")
+
+
+def start_bot1():
+    bot.infinity_polling(timeout = 5)
+
+def start_bot2():
+    bot2.infinity_polling(timeout = 5)
+
+# Graceful shutdown handling
+shutdown_event = threading.Event()
+
+def main():
+    # Run both bots in separate threads
+    thread1 = threading.Thread(target=start_bot1)
+    thread2 = threading.Thread(target=start_bot2)
+
+    thread1.start()
+    thread2.start()
+
+    try:
+        while True:
+            time.sleep(1)  # Keep the main thread alive
+    except KeyboardInterrupt:
+        print("Shutting down...")
+        shutdown_event.set()
+
+        # Allow time for bots to finish handling any remaining requests
+        thread1.join()
+        thread2.join()
+        print("Bots shut down gracefully.")
+
+# Run the main function
+if __name__ == "__main__":
+    main()
