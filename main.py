@@ -15,8 +15,8 @@ GROUP_CHAT_ID = -1002376294175  # Example: replace with your actual group chat I
 bot = telebot.TeleBot(API_TOKEN)
 bot2 = telebot.TeleBot(API_TOKEN2)
 
-answers = ["That's smart money", "Corporate buying the dip", "Hell of an entry!", "I hope you're ready for the yacht"]
-answers2 = ["That’s not a buy, that’s a low-key flex", "Did Goldman Sachs give you a tip bro?", "Straight from the big bank playbook", "Institution."]
+answers = ["That's smart money", "Corporate buying the dip", "Hell of an entry!", "Intelligeny guy", "Rose is jealous of you"]
+answers2 = ["That’s not a buy, that’s a low-key flex brother", "Did Goldman Sachs give you a tip bro?", "Damn boy, straight from the big bank playbook", "Institution."]
 answers3 = ["That’s the kind of buy you make in a limo lol"]
 # Directory to save the GIFs and stickers
 GIF_DIRECTORY = "saved_gifs"
@@ -199,13 +199,13 @@ def message_handler(message):
                 
                 if (float(part_after_sign) >= 500.0):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers3))
-                if (float(part_after_sign) >= 400.0):
+                if (float(part_after_sign) >= 300.0):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers2))
                 elif (float(part_after_sign) >= 200.0) and (random.random() < 0.4):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
-                elif (float(part_after_sign) >= 150.0) and (random.random() < 0.3):
+                elif (float(part_after_sign) >= 150.0) and (random.random() < 0.35):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
-                elif (float(part_after_sign) >= 100.0) and (random.random() < 0.2):
+                elif (float(part_after_sign) >= 100.0) and (random.random() < 0.3):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
                 elif (float(part_after_sign) >= 50.0) and (random.random() < 0.20):
                     bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
