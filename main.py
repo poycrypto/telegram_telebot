@@ -202,15 +202,15 @@ def message_handler(message):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers3))
                     if (float(part_after_sign) >= 300.0):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers2))
-                    elif (float(part_after_sign) >= 200.0) and (random.random() < 0.4):
+                    elif (float(part_after_sign) >= 200.0) and (random.random() < 0.8):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
-                    elif (float(part_after_sign) >= 150.0) and (random.random() < 0.35):
+                    elif (float(part_after_sign) >= 150.0) and (random.random() < 0.5):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
-                    elif (float(part_after_sign) >= 100.0) and (random.random() < 0.3):
+                    elif (float(part_after_sign) >= 100.0) and (random.random() < 0.5):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
-                    elif (float(part_after_sign) >= 50.0) and (random.random() < 0.20):
+                    elif (float(part_after_sign) >= 50.0) and (random.random() < 0.35):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
-                    elif (float(part_after_sign) <= 50.0) and (random.random() < 0.15):
+                    elif (float(part_after_sign) <= 50.0) and (random.random() < 0.25):
                         bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))      
                 else:
                     print("No content found after 💵.")
