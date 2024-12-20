@@ -190,7 +190,7 @@ def delete_file(message):
 def message_handler(message):
     # Check if the message contains the 💵 symbol
     if message.content_type == "animation":
-        if message.caption
+        if message.caption:
             if '💵' in message.caption:
                 # Use regular expression to get the part after "💵"
                 match = re.search(r'💵\s*\$([\d.,]+)', message.caption)
