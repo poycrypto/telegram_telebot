@@ -190,29 +190,30 @@ def delete_file(message):
 def message_handler(message):
     # Check if the message contains the 💵 symbol
     if message.content_type == "animation":
-        if '💵' in message.caption:
-            # Use regular expression to get the part after "💵"
-            match = re.search(r'💵\s*\$([\d.,]+)', message.caption)
-            if match:
-                part_after_sign = match.group(1).strip()  # Extract the part after "💵"
-                # Get the timestamp of the message
-                
-                if (float(part_after_sign) >= 500.0):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers3))
-                if (float(part_after_sign) >= 300.0):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers2))
-                elif (float(part_after_sign) >= 200.0) and (random.random() < 0.4):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
-                elif (float(part_after_sign) >= 150.0) and (random.random() < 0.35):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
-                elif (float(part_after_sign) >= 100.0) and (random.random() < 0.3):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
-                elif (float(part_after_sign) >= 50.0) and (random.random() < 0.20):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
-                elif (float(part_after_sign) <= 50.0) and (random.random() < 0.15):
-                    bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))      
-            else:
-                print("No content found after 💵.")
+        if message.caption
+            if '💵' in message.caption:
+                # Use regular expression to get the part after "💵"
+                match = re.search(r'💵\s*\$([\d.,]+)', message.caption)
+                if match:
+                    part_after_sign = match.group(1).strip()  # Extract the part after "💵"
+                    # Get the timestamp of the message
+                    
+                    if (float(part_after_sign) >= 500.0):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers3))
+                    if (float(part_after_sign) >= 300.0):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers2))
+                    elif (float(part_after_sign) >= 200.0) and (random.random() < 0.4):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
+                    elif (float(part_after_sign) >= 150.0) and (random.random() < 0.35):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
+                    elif (float(part_after_sign) >= 100.0) and (random.random() < 0.3):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))
+                    elif (float(part_after_sign) >= 50.0) and (random.random() < 0.20):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers)) 
+                    elif (float(part_after_sign) <= 50.0) and (random.random() < 0.15):
+                        bot2.send_message(chat_id=message.chat.id, text=random.choice(answers))      
+                else:
+                    print("No content found after 💵.")
         else:
             print("The message doesn't contain 💵.")
 
